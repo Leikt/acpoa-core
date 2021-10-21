@@ -15,7 +15,12 @@ setuptools.setup(
     description="Application Core for Plugin Oriented Applications",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="____url____",
+    url="https://github.com/Leikt/acpoa-core",
+    project_urls = {
+        "Bug Tracker": "https://github.com/Leikt/acpoa-core/issues",
+        "Wiki": "https://github.com/Leikt/acpoa-core/wiki",
+        "Discussions": "https://github.com/Leikt/acpoa-core/discussions"
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
