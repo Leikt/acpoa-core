@@ -50,7 +50,7 @@ class Core(metaclass=Singleton):
     def quit(self):
         self._status = Core.Status.TERMINATED
 
-    def fetch(self, name: str, klass: object) -> Handler:
+    def fetch(self, name: str, klass: callable) -> Handler:
         """Get the handler with the given name.
 
         :param name: name of the handler
@@ -74,7 +74,9 @@ class Core(metaclass=Singleton):
         raise TypeError(f"Handler class {klass} doesn't exists. It must be one of {allowed_handlers}")
 
     def remove(self, name: str):
-        """Remove handler if it exists"""
+        """Remove handler if it exists
+
+        :param name: name the handler to remove"""
         if name in self._handlers:
             del self._handlers[name]
 
