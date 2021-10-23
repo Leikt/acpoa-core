@@ -1,5 +1,6 @@
 import unittest
 
+import src.core.singleton
 from src.core import Core, CumulativeHandler, DecorativeHandler, Handler
 
 
@@ -16,12 +17,14 @@ class TestCore(unittest.TestCase):
         self.core = Core()
 
     def tearDown(self) -> None:
-        Core.delete
+        Core.delete()
 
     def test_core_singleton(self):
         a = Core()
         b = Core()
         assert id(a) == id(b)
+        Core.delete()   # Delete existing core
+        assert id(a) != id(Core()) # Create a new core
 
     def test_core_exceptions(self):
         self.assertRaises(Exception, self.core.run)
@@ -46,7 +49,8 @@ class TestCore(unittest.TestCase):
 
     def test_core_remove(self):
         core = self.core
+        count = len(core._handlers.items())
         core.fetch('test', DecorativeHandler)
-        assert len(core._handlers.items()) == 4
+        assert len(core._handlers.items()) == (count + 1)
         core.remove('test')
-        assert len(core._handlers) == 3
+        assert len(core._handlers) == count

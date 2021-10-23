@@ -6,6 +6,6 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
-    @classmethod
-    def delete(mcs):
-        del mcs._instances[mcs]
+    def delete(self):
+        if self in self._instances:
+            del self._instances[self]
