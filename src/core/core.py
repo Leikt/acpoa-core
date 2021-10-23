@@ -3,7 +3,7 @@ import os.path
 import shutil
 
 from .singleton import Singleton
-from .handler import Handler, CumulativeHandler
+from .hookshandler import HooksHandler, CumulativeHooksHandler
 
 
 class Core(metaclass=Singleton):
@@ -50,7 +50,7 @@ class Core(metaclass=Singleton):
     def quit(self):
         self._status = Core.Status.TERMINATED
 
-    def fetch(self, name: str, klass: callable) -> Handler:
+    def fetch(self, name: str, klass: callable) -> HooksHandler:
         """Get the handler with the given name.
 
         :param name: name of the handler
@@ -67,7 +67,7 @@ class Core(metaclass=Singleton):
             raise TypeError(f"Existing handler named '{name}' <{type(self._handlers[name]).__name__}>, "
                             f"you are trying to get a <{klass.__name__}> handler")
         # Attempt to create
-        allowed_handlers = Handler.__subclasses__()
+        allowed_handlers = HooksHandler.__subclasses__()
         if klass in allowed_handlers:
             self._handlers[name] = klass(name)
             return self._handlers[name]
@@ -102,5 +102,5 @@ class Core(metaclass=Singleton):
         print(f"File copied from default to '{dst}'.")
 
     def _init_handlers(self):
-        self.fetch('run', CumulativeHandler)
-        self.fetch('quit', CumulativeHandler)
+        self.fetch('run', CumulativeHooksHandler)
+        self.fetch('quit', CumulativeHooksHandler)

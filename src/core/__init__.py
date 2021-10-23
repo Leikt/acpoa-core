@@ -1,2 +1,2 @@
 from .core import Core
-from .handler import UniqueHandler, DecorativeHandler, CumulativeHandler, Handler
+from .hookshandler import UniqueHooksHandler, DecorativeHooksHandler, CumulativeHooksHandler, HooksHandler

@@ -1,14 +1,14 @@
 import unittest
 
 import src.core.singleton
-from src.core import Core, CumulativeHandler, DecorativeHandler, Handler
+from src.core import Core, CumulativeHooksHandler, DecorativeHooksHandler, HooksHandler
 
 
 class NonExistant:
     pass
 
 
-class CustomHandler(Handler):
+class CustomHooksHandler(HooksHandler):
     pass
 
 
@@ -41,16 +41,16 @@ class TestCore(unittest.TestCase):
 
     def test_core_fetch(self):
         core = self.core
-        assert type(core.fetch('test', DecorativeHandler)) == DecorativeHandler  # Create
-        assert type(core.fetch('test', DecorativeHandler)) == DecorativeHandler  # Get
-        self.assertRaises(TypeError, core.fetch, 'test', CumulativeHandler)  # Get the wrong type
+        assert type(core.fetch('test', DecorativeHooksHandler)) == DecorativeHooksHandler  # Create
+        assert type(core.fetch('test', DecorativeHooksHandler)) == DecorativeHooksHandler  # Get
+        self.assertRaises(TypeError, core.fetch, 'test', CumulativeHooksHandler)  # Get the wrong type
         self.assertRaises(TypeError, core.fetch, 'wrong', NonExistant)  # Not a handler class
-        assert type(core.fetch('with_custom_handler', CustomHandler)) == CustomHandler
+        assert type(core.fetch('with_custom_handler', CustomHooksHandler)) == CustomHooksHandler
 
     def test_core_remove(self):
         core = self.core
         count = len(core._handlers.items())
-        core.fetch('test', DecorativeHandler)
+        core.fetch('test', DecorativeHooksHandler)
         assert len(core._handlers.items()) == (count + 1)
         core.remove('test')
         assert len(core._handlers) == count
