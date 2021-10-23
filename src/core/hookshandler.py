@@ -1,10 +1,22 @@
+########################################################################################################################
+# ACPOA - HooksHandler                                                                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
+# Author : Leikt                                                                                                       #
+# Author email : leikt.solreihin@gmail.com                                                                             #
+########################################################################################################################
+
 class HooksHandler:
+    """Handle a collection of hooks."""
+
     def __init__(self, name: str):
         self._hooks = []
         self._name = name
 
     @property
     def name(self) -> str:
+        """Name of the handler.
+
+        :return: the name of the handler"""
         return self._name
 
     def register(self, name: str, method: callable, priority: int = 0):

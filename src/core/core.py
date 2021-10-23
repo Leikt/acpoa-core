@@ -1,3 +1,10 @@
+########################################################################################################################
+# ACPOA - Core                                                                                                         #
+# -------------------------------------------------------------------------------------------------------------------- #
+# Author : Leikt                                                                                                       #
+# Author email : leikt.solreihin@gmail.com                                                                             #
+########################################################################################################################
+
 import configparser
 import os.path
 import shutil
@@ -7,7 +14,7 @@ from .hookshandler import HooksHandler, CumulativeHooksHandler
 
 
 class Core(metaclass=Singleton):
-    """Manage communication between the different plugins and provide essentials application interface."""
+    """Manage communication between the different plugins and provide essential application interface."""
 
     ACPOA_CFG_DEFAULT = "defaults/acpoa.cfg"
     PLUGINS_CFG_DEFAULT = "defaults/plugins.cfg"
@@ -39,19 +46,20 @@ class Core(metaclass=Singleton):
         """Manage the plugins according to configuration file acpoa.cfg then load the plugins from plugins.cfg."""
         self._status = Core.Status.LOADED
 
-    def run(self):
+    def run(self, argv: list = []):
         """Start the application by calling the the 'run' handler.
 
         :raise Exception: if this method is called before load."""
         if self._status < Core.Status.LOADED:
             raise Exception("Core.run called before Core.load.")
+        self.execute('run', *argv)
         self._status = Core.Status.RUNNING
 
     def quit(self):
         self._status = Core.Status.TERMINATED
 
-    def fetch(self, name: str, klass: callable) -> HooksHandler:
-        """Get the handler with the given name.
+    def fetch(self, name: str, klass: callable = None) -> HooksHandler:
+        """Get the handler with the given name. Create it if it does not exist.
 
         :param name: name of the handler
         :param klass: klass of the handler
@@ -60,18 +68,13 @@ class Core(metaclass=Singleton):
         :return: the requested handler"""
 
         handler = self._handlers.get(name, None)
-        # Attempt to get
-        if handler is not None:
-            if type(handler) == klass:
-                return handler
+        if handler is not None and klass is not None and type(handler) != klass:
             raise TypeError(f"Existing handler named '{name}' <{type(self._handlers[name]).__name__}>, "
-                            f"you are trying to get a <{klass.__name__}> handler")
-        # Attempt to create
-        allowed_handlers = HooksHandler.__subclasses__()
-        if klass in allowed_handlers:
-            self._handlers[name] = klass(name)
-            return self._handlers[name]
-        raise TypeError(f"Handler class {klass} doesn't exists. It must be one of {allowed_handlers}")
+                            f"you are trying to get a <{klass.__name__}>")
+        if handler is None and klass not in HooksHandler.__subclasses__():
+            raise TypeError(f"Handler class {klass} doesn't exists. It must be one of {HooksHandler.__subclasses__()}")
+        if handler is None: self._handlers[name] = klass(name)
+        return self._handlers[name]
 
     def remove(self, name: str):
         """Remove handler if it exists
@@ -80,7 +83,7 @@ class Core(metaclass=Singleton):
         if name in self._handlers:
             del self._handlers[name]
 
-    def execute(self):
+    def execute(self, name, *args, **kwargs):
         pass
 
     def register(self):
