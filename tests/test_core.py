@@ -37,7 +37,7 @@ class TestCore(unittest.TestCase):
         core.run()
         assert core.status == core.Status.RUNNING
         core.quit()
-        assert core.status == core.Status.TERMINATED
+        assert core.status == core.Status.QUTTING
 
     def test_fetch(self):
         core = self.core
@@ -56,3 +56,4 @@ class TestCore(unittest.TestCase):
         assert len(core._handlers.items()) == (count + 1)
         core.remove('test')
         assert len(core._handlers) == count
+        self.assertRaises(KeyError, core.remove, 'test')

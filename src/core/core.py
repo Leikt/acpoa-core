@@ -25,7 +25,7 @@ class Core(metaclass=Singleton):
         INITIALIZED = 1
         LOADED = 2
         RUNNING = 3
-        TERMINATED = 4
+        QUTTING = 4
 
     def __init__(self):
         # Initialize configuration files if needed
@@ -51,12 +51,13 @@ class Core(metaclass=Singleton):
 
         :raise Exception: if this method is called before load."""
         if self._status < Core.Status.LOADED:
-            raise Exception("Core.run called before Core.load.")
-        self.execute('run', *argv)
+            raise Exception("Core.run called before Core.load")
         self._status = Core.Status.RUNNING
+        self.execute('run', *argv)
 
     def quit(self):
-        self._status = Core.Status.TERMINATED
+        self._status = Core.Status.QUTTING
+        self.execute('quit')
 
     def fetch(self, name: str, klass: callable = None) -> HooksHandler:
         """Get the handler with the given name. Create it if it does not exist.
@@ -79,9 +80,11 @@ class Core(metaclass=Singleton):
     def remove(self, name: str):
         """Remove handler if it exists
 
-        :param name: name the handler to remove"""
-        if name in self._handlers:
-            del self._handlers[name]
+        :param name: name the handler to remove
+        :raise KeyError: if the handler doesn't exists"""
+        if name not in self._handlers:
+            raise KeyError(f"No handler named '{name}'")
+        del self._handlers[name]
 
     def execute(self, name, *args, **kwargs):
         pass
