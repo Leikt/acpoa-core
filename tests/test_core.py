@@ -1,23 +1,33 @@
 import unittest
 
-from src.core import Core, CumulativeHandler
-from src.core import DecorativeHandler
+from src.core import Core, CumulativeHandler, DecorativeHandler, Handler
+
 
 class NonExistant:
     pass
 
+
+class CustomHandler(Handler):
+    pass
+
+
 class TestCore(unittest.TestCase):
+    def setUp(self) -> None:
+        self.core = Core()
+
+    def tearDown(self) -> None:
+        Core.delete
+
     def test_core_singleton(self):
         a = Core()
         b = Core()
         assert id(a) == id(b)
 
     def test_core_exceptions(self):
-        core = Core()
-        self.assertRaises(Exception, core.run)
+        self.assertRaises(Exception, self.core.run)
 
     def test_core_status(self):
-        core = Core()
+        core = self.core
         assert core.status == core.Status.INITIALIZED
         core.load()
         assert core.status == core.Status.LOADED
@@ -27,8 +37,16 @@ class TestCore(unittest.TestCase):
         assert core.status == core.Status.TERMINATED
 
     def test_core_fetch(self):
-        core = Core()
+        core = self.core
         assert type(core.fetch('test', DecorativeHandler)) == DecorativeHandler  # Create
         assert type(core.fetch('test', DecorativeHandler)) == DecorativeHandler  # Get
         self.assertRaises(TypeError, core.fetch, 'test', CumulativeHandler)  # Get the wrong type
-        self.assertRaises(TypeError, core.fetch, 'wrong', NonExistant) # Not a handler class
+        self.assertRaises(TypeError, core.fetch, 'wrong', NonExistant)  # Not a handler class
+        assert type(core.fetch('with_custom_handler', CustomHandler)) == CustomHandler
+
+    def test_core_remove(self):
+        core = self.core
+        core.fetch('test', DecorativeHandler)
+        assert len(core._handlers.items()) == 4
+        core.remove('test')
+        assert len(core._handlers) == 3

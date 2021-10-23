@@ -73,8 +73,10 @@ class Core(metaclass=Singleton):
             return self._handlers[name]
         raise TypeError(f"Handler class {klass} doesn't exists. It must be one of {allowed_handlers}")
 
-    def remove(self):
-        pass
+    def remove(self, name: str):
+        """Remove handler if it exists"""
+        if name in self._handlers:
+            del self._handlers[name]
 
     def execute(self):
         pass
