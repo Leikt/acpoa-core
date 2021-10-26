@@ -1,6 +1,5 @@
 import unittest
 
-import src.core.singleton
 from src.core import Core, CumulativeHooksHandler, DecorativeHooksHandler, HooksHandler
 
 
@@ -57,3 +56,27 @@ class TestCore(unittest.TestCase):
         core.remove('test')
         assert len(core._handlers) == count
         self.assertRaises(KeyError, core.remove, 'test')
+
+    def test_execute(self):
+        core = self.core
+        hh = core.fetch('test', DecorativeHooksHandler)
+        hh.register('test_hh', lambda: 10)
+        assert core.execute('test') == 10
+        self.assertRaises(KeyError, core.execute, 'not_exists')
+
+    def test_register(self):
+        core = self.core
+        action = lambda: 10
+        core.register('test', 'test_hook', action, hh_class=DecorativeHooksHandler)
+        assert core.execute('test') == 10
+
+    def test_unregister(self):
+        core = self.core
+        core.register('test', 'test_hook', lambda: None, hh_class=DecorativeHooksHandler)
+        core.register('test', 'test_hook2', lambda: None)
+        count = len(core.fetch('test')._hooks)
+        core.unregister('test', 'test_hook')
+        assert len(core.fetch('test')._hooks) == count - 1
+        core.unregister('test', 'test_hook2')
+        assert len(core.fetch('test')._hooks) == count - 2
+        self.assertRaises(KeyError, core.unregister, 'not_exist', 'test_hook')

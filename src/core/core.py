@@ -9,8 +9,8 @@ import configparser
 import os.path
 import shutil
 
-from .singleton import Singleton
 from .hookshandler import HooksHandler, CumulativeHooksHandler
+from .singleton import Singleton
 
 
 class Core(metaclass=Singleton):
@@ -56,6 +56,7 @@ class Core(metaclass=Singleton):
         self.execute('run', *argv)
 
     def quit(self):
+        """Start the exit sequence and close the application."""
         self._status = Core.Status.QUTTING
         self.execute('quit')
 
@@ -86,14 +87,37 @@ class Core(metaclass=Singleton):
             raise KeyError(f"No handler named '{name}'")
         del self._handlers[name]
 
-    def execute(self, name, *args, **kwargs):
-        pass
+    def execute(self, name: str, *args, **kwargs) -> any:
+        """Execute the hooks
 
-    def register(self):
-        pass
+        :param name: name of the hook handler
+        :raise KeyError: if the name matches no hook handler
+        :return: execution result"""
+        if name not in self._handlers:
+            raise KeyError(f"There is no handler named '{name}'")
+        return self._handlers[name].execute(*args, **kwargs)
 
-    def unregister(self):
-        pass
+    def register(self, hh_name: str, hook_name: str, method: callable, priority: int = 0, hh_class: callable = None):
+        """Register a hook. It will attempt to create the hook handler if it doesn't exist.
+
+        :param hh_name: name of the handler
+        :param hook_name: name of the hook
+        :param method: callable that the hook will call
+        :param priority: priority of the hook
+        :param hh_class: class of the hook handler"""
+        hook_handler = self.fetch(hh_name, hh_class)
+        hook_handler.register(hook_name, method, priority)
+
+    def unregister(self, hh_name: str, hook_name: str):
+        """Remove a hook.
+
+        :param hh_name: name of the hook handler where to remove the hook.
+        :param hook_name: name of hook to remove.
+        :raise KeyError: if the handlers isn't registred"""
+        if hh_name in self._handlers:
+            self._handlers[hh_name].remove(hook_name)
+        else:
+            raise KeyError(f"There is no hook handler named '{hh_name}'")
 
     @property
     def status(self):

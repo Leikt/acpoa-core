@@ -48,11 +48,34 @@ class HooksHandler:
         self._hooks.remove(hook)
 
     def execute(self, *args, **kwargs) -> any:
+        """Execute the hook by priority
+
+        :param args: positional arguments
+        :param kwargs: key arguments
+        :return: result of the execution"""
         raise NotImplementedError()
 
 
 class DecorativeHooksHandler(HooksHandler):
+    """Execute hook by passing results to the next hook. Each hook modify the values.
+
+    Example:
+
+    handler = DecorativeHooksHandler('test')
+
+    handler.register('a', lambda x: x + 1)
+
+    handler.register('b', lambda x: x + 4)
+
+    handler.execute(0) #> 5"""
+
     def execute(self, *args, **kwargs) -> any:
+        """Execute the hook by priority
+
+        :param args: positional arguments
+        :param kwargs: key arguments
+        :raise Exception: if key arguments are given, this handler does not take key arguments.
+        :return: result of the execution"""
         if len(kwargs) > 0:
             raise Exception(f"{self.__class__.__name__} does not take key arguments.")
         multiple_args = len(args) > 1
