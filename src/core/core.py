@@ -6,10 +6,12 @@
 ########################################################################################################################
 
 import configparser
+import enum
 import os.path
 import shutil
 
 from .hookshandler import HooksHandler, CumulativeHooksHandler
+from .plugin_manager import PluginManager
 from .singleton import Singleton
 
 
@@ -21,7 +23,7 @@ class Core(metaclass=Singleton):
     ACPOA_CFG = "cfg/acpoa.cfg"
     PLUGINS_CFG = "cfg/plugins.cfg"
 
-    class Status:
+    class Status(enum.IntEnum):
         INITIALIZED = 1
         LOADED = 2
         RUNNING = 3
@@ -40,10 +42,13 @@ class Core(metaclass=Singleton):
         # self._plugin_manager = PluginManager(self.PLUGINS_CFG)
         self._handlers = {}
         self._init_handlers()
+        self._plugins = []
         self._status = Core.Status.INITIALIZED
 
     def load(self):
         """Manage the plugins according to configuration file acpoa.cfg then load the plugins from plugins.cfg."""
+        plugin_manager = PluginManager(self.ACPOA_CFG, self.PLUGINS_CFG)
+        self._plugins = plugin_manager.load()
         self._status = Core.Status.LOADED
 
     def run(self, argv: list = []):
@@ -120,7 +125,8 @@ class Core(metaclass=Singleton):
             raise KeyError(f"There is no hook handler named '{hh_name}'")
 
     @property
-    def status(self):
+    def status(self) -> Status:
+        """Return the status of the Core"""
         return self._status
 
     @staticmethod

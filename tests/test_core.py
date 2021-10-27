@@ -80,3 +80,7 @@ class TestCore(unittest.TestCase):
         core.unregister('test', 'test_hook2')
         assert len(core.fetch('test')._hooks) == count - 2
         self.assertRaises(KeyError, core.unregister, 'not_exist', 'test_hook')
+
+    def test_load(self):
+        core = self.core
+        core.load()
