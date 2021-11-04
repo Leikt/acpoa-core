@@ -7,6 +7,8 @@ import os.path
 class Configuration(configparser.ConfigParser):
     """Help to manage configuration file and parsing."""
 
+    SUBSECTION_DELIMITER = ':'
+
     _opened = {}
 
     @classmethod
@@ -27,7 +29,7 @@ class Configuration(configparser.ConfigParser):
         return config
 
     @classmethod
-    def clear(cls):
+    def close_all(cls):
         """Delete all the open Configuration objects"""
         cls._opened.clear()
 
@@ -61,7 +63,7 @@ class Configuration(configparser.ConfigParser):
         with open(self._filename, 'w') as file:
             self.write(file)
 
-    def values(self, section):
+    def values(self, section) -> list[str]:
         """Return all the values of the given section
 
         :param section"""
@@ -69,3 +71,21 @@ class Configuration(configparser.ConfigParser):
         for option in self.options(section):
             result.append(self.get(section, option))
         return result
+
+    def subsection(self, *args) -> str:
+        """Construct the name of the subsection using the given section parameters."""
+        return self.SUBSECTION_DELIMITER.join(args)
+
+    def subsections_of(self, *parents: str) -> list[str]:
+        """Get all the sections that are children of given parent
+
+        :param parents: liste of section and subsection to the wanted one"""
+        parent = self.SUBSECTION_DELIMITER.join(parents)
+        results = []
+        for section in self.sections():
+            if section.startswith(parent) and section != parent:
+                results.append(section)
+        return results
+
+    def subsection_name(self, section: str) -> str:
+        return section.split(self.SUBSECTION_DELIMITER)[-1]
