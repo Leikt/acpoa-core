@@ -37,6 +37,6 @@ class TestConfiguration(unittest.TestCase):
         c = Configuration.open(self.PATH_TO_TEST)
         c.setboolean('section2', 'bool', True)
         assert c.getboolean('section2', 'bool')
-        c.setboolean('section2', 'bool', False)
+        c.setboolean('section2', 'bool', 'no')
         assert not c.getboolean('section2', 'bool')
         self.assertRaises(TypeError, c.setboolean, 'section2', 'bool', 'not_a_bool')

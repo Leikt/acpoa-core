@@ -30,3 +30,18 @@ class TestPluginInstaller(unittest.TestCase):
         pi.remove(package)
         self.assertRaises(Exception, pi.update, package)
         self.assertRaises(Exception, pi.update, 'package_does_not_exist')
+
+    def test_repository_add_has_remove(self):
+        pi = PluginInstaller(self.ACPO_TEST_CONF, self.PLUGIN_TEST_CONF)
+        repo = 'new_repo'
+        pi.remove_repository(repo)
+        assert not pi.has_repository(repo)
+        pi.add_repository(repo, 'https://dummy.com')
+        assert pi.has_repository(repo)
+        pi.remove_repository(repo)
+        assert not pi.has_repository(repo)
+        # Test the different ways of boolean editable
+        pi.add_repository(repo, 'https://dummy2.com', editable='no')
+        pi.remove_repository(repo)
+        pi.add_repository(repo, 'https://dummy2.com', editable=True)
+        pi.remove_repository(repo)

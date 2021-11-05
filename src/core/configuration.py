@@ -90,10 +90,13 @@ class Configuration(configparser.ConfigParser):
     def subsection_name(self, section: str) -> str:
         return section.split(self.SUBSECTION_DELIMITER)[-1]
 
-    def setboolean(self, section, option, value):
-        if type(value) != bool:
-            raise TypeError(f"'{value}' is not a boolean.")
+    def setboolean(self, section, option, value: [bool, str]):
+        if type(value) != bool and value not in self.BOOLEAN_STATES:
+            raise TypeError(f"'{value}' is not a boolean nor a valid boolean statement")
 
-        index = list(self.BOOLEAN_STATES.values()).index(value)
-        final = list(self.BOOLEAN_STATES.keys())[index]
-        self.set(section, option, final)
+        if type(value) == bool:
+            index = list(self.BOOLEAN_STATES.values()).index(value)
+            final = list(self.BOOLEAN_STATES.keys())[index]
+            self.set(section, option, final)
+        else:
+            self.set(section, option, value)
