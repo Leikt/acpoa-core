@@ -32,3 +32,11 @@ class TestConfiguration(unittest.TestCase):
         sub3_name = c.subsection_name(sub3)
         assert sub3_name == 'sub3'
         assert c.get(sub3, 'opt31') == 'value12'
+
+    def test_set_boolean(self):
+        c = Configuration.open(self.PATH_TO_TEST)
+        c.setboolean('section2', 'bool', True)
+        assert c.getboolean('section2', 'bool')
+        c.setboolean('section2', 'bool', False)
+        assert not c.getboolean('section2', 'bool')
+        self.assertRaises(TypeError, c.setboolean, 'section2', 'bool', 'not_a_bool')

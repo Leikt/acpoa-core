@@ -89,3 +89,11 @@ class Configuration(configparser.ConfigParser):
 
     def subsection_name(self, section: str) -> str:
         return section.split(self.SUBSECTION_DELIMITER)[-1]
+
+    def setboolean(self, section, option, value):
+        if type(value) != bool:
+            raise TypeError(f"'{value}' is not a boolean.")
+
+        index = list(self.BOOLEAN_STATES.values()).index(value)
+        final = list(self.BOOLEAN_STATES.keys())[index]
+        self.set(section, option, final)
