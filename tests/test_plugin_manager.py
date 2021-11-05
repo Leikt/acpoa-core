@@ -5,7 +5,7 @@ from src.core.plugin_manager import PluginManager
 
 
 class TestPluginManager(unittest.TestCase):
-    def test_set(self):
+    def todo_test_set(self):
         cfg_dir = os.path.join(os.path.dirname(__file__), 'cfg')
         pm = PluginManager(os.path.join(cfg_dir, 'acpoa.cfg'), os.path.join(cfg_dir, 'preset_plugins.cfg'))
 

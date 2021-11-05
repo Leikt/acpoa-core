@@ -79,11 +79,12 @@ class Configuration(configparser.ConfigParser):
     def subsections_of(self, *parents: str) -> list[str]:
         """Get all the sections that are children of given parent
 
-        :param parents: liste of section and subsection to the wanted one"""
+        :param parents: list of section and subsection to the wanted one
+        :return: list of complete subsection names including parent ["section:subsection"]"""
         parent = self.SUBSECTION_DELIMITER.join(parents)
         results = []
         for section in self.sections():
-            if section.startswith(parent) and section != parent:
+            if section.startswith(parent + self.SUBSECTION_DELIMITER) and section != parent:
                 results.append(section)
         return results
 

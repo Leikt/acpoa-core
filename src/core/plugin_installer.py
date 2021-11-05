@@ -15,7 +15,7 @@ class PluginInstaller(metaclass=Singleton):
     def __init__(self, config_fname: str, plugin_config_fname: str):
         self._config = Configuration.open(config_fname)
         self._plugins_config = Configuration.open(plugin_config_fname)
-        self._repositories = []
+        self._repositories = self._load_repositories()
         self._plugin_eoi = self._config.get(self._ACPOA_CFG_SECTION_PLUGINS, 'enable-on-installation')
         self._repo_eoi = self._config.get(self._ACPOA_CFG_SECTION_REPOSITORIES, 'enable-on-installation')
 
@@ -25,7 +25,10 @@ class PluginInstaller(metaclass=Singleton):
         :param package: name of the plugin to install
         :raise Exception: if the package couldn't be installed. Provides pip error code."""
 
-        result = os.system(f"python3 -m pip -q install {package}")
+        result = None
+        for repo in self._repositories:
+            result = repo.install(package)
+            if result == 0: break
         if result > 0: raise Exception(f"Package '{package}' can't be installed. Pip returned error core : {result}")
 
         if not self._plugins_config.has_section(package):
@@ -94,6 +97,28 @@ class PluginInstaller(metaclass=Singleton):
         self._config.remove_section(section)
         self._config.save()
 
+    def _load_repositories(self):
+        repos = []
+        for section in self._config.subsections_of(self._ACPOA_CFG_SECTION_REPO):
+            if not self._config.getboolean(section, 'enabled'): continue
+
+            index = self._config.get(section, 'index')
+            editable = self._config.getboolean(section, 'editable', fallback=False)
+            repos.append(self.Repository(index, editable))
+        return repos
+
     class Repository:
-        def __init__(self, index: str):
+        def __init__(self, index: str, editable: bool):
             self._index = index
+            self._editable = editable
+            self._editable_opt = '-e' if editable else ''
+
+        def install(self, package, upgrade: bool = False):
+            command = f"python3 -m pip -q install {self._editable_opt} " \
+                      f"{'--upgrade' if upgrade else ''} " \
+                      f"--index-url {self._index} " \
+                      f"{package} "
+            return os.system(command)
+
+        def upgrade(self, package):
+            return self.install(package, upgrade=True)
