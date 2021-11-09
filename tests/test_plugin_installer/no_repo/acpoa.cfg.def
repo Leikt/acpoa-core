@@ -1,0 +1,5 @@
+[plugins]
+enable-on-installation = yes
+
+[repositories]
+enable-on-installation = yes

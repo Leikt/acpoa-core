@@ -1,0 +1,9 @@
+[plugins]
+enable-on-installation = yes
+
+[repositories]
+enable-on-installation = yes
+
+[repo:pypi]
+index = https://pypi.org/simple/
+enabled = yes
