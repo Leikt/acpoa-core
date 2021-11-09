@@ -1,0 +1,13 @@
+[plugins]
+enable-on-installation = yes
+
+[repositories]
+enable-on-installation = yes
+
+[repo:localhost]
+index = http://localhost:8080/simple/
+enabled = yes
+
+[repo:pypi]
+index = https://pypi.org/simple/
+enabled = no

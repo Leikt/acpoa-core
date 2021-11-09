@@ -76,6 +76,11 @@ class PluginInstaller(metaclass=Singleton):
         if result > 0: raise Exception(f"Package '{package}' can't be updated. Pip returned error core : {result}")
 
     def is_installed(self, package: str) -> bool:
+        """Test if the given plugin is installed
+
+        :param package: name of the plugin to test
+        :return: whether or not the plugin is installed"""
+
         res = importlib.util.find_spec(package)
         return res is not None
 
@@ -103,6 +108,17 @@ class PluginInstaller(metaclass=Singleton):
 
         self._repositories = self._load_repositories()
 
+    def remove_repository(self, name: str):
+        """Remove the repository from the list.
+
+        :param name: name of the repository to remove"""
+
+        section = self._config.subsection(self._ACPOA_CFG_SECTION_REPO, name)
+        self._config.remove_section(section)
+        self._config.save()
+
+        self._repositories = self._load_repositories()
+
     def has_repository(self, name) -> bool:
         """Test if the given repository is installed.
 
@@ -117,13 +133,24 @@ class PluginInstaller(metaclass=Singleton):
         if not self._config.has_section(section): return False
         return self._config.getboolean(section, 'enabled')
 
-    def remove_repository(self, name: str):
-        """Remove the repository from the list.
+    def enable_repository(self, name: str):
+        """Enable a repository
 
-        :param name: name of the repository to remove"""
+        :param name: name of the repository"""
 
         section = self._config.subsection(self._ACPOA_CFG_SECTION_REPO, name)
-        self._config.remove_section(section)
+        self._config.setboolean(section, 'enabled', True)
+        self._config.save()
+
+        self._repositories = self._load_repositories()
+
+    def disable_repository(self, name: str):
+        """Disable a repository.
+
+        :param name: name of the repository"""
+
+        section = self._config.subsection(self._ACPOA_CFG_SECTION_REPO, name)
+        self._config.setboolean(section, 'enabled', False)
         self._config.save()
 
         self._repositories = self._load_repositories()

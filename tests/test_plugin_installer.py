@@ -142,3 +142,30 @@ class TestPluginInstaller(unittest.TestCase):
             raise
         finally:
             self.clean_files(acpoa_cfg, plugins_cfg)
+
+    def test_has_repository(self):
+        # Initialize data and objects
+        acpoa_cfg = os.path.join('test_plugin_installer', 'has_repo', 'acpoa.cfg')
+        plugins_cfg = os.path.join('test_plugin_installer', 'has_repo', 'plugins.cfg')
+        self.copy_files(acpoa_cfg, plugins_cfg)
+        pi = PluginInstaller(acpoa_cfg, plugins_cfg)
+
+        try:
+            assert pi.has_repository('localhost')
+            assert pi.has_repository('pypi')
+            assert not pi.has_repository('no_repo')
+            assert pi.has_enabled_repository('localhost')
+            assert not pi.has_enabled_repository('pypi')
+            assert not pi.has_enabled_repository('no_repo')
+
+            # Disable a repo
+            pi.disable_repository('localhost')
+            assert pi.has_repository('localhost')
+            assert not pi.has_enabled_repository('localhost')
+            pi.enable_repository('pypi')
+            assert pi.has_repository('pypi')
+            assert pi.has_enabled_repository('pypi')
+        except:
+            raise
+        finally:
+            self.clean_files(acpoa_cfg, plugins_cfg)
