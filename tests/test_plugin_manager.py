@@ -2,7 +2,7 @@ import os.path
 import shutil
 import unittest
 
-from src.core.plugin_manager import PluginManager
+from src.acpoa import PluginManager
 
 
 class TestPluginManager(unittest.TestCase):
@@ -56,7 +56,7 @@ class TestPluginManager(unittest.TestCase):
         non_existing_package = 'do_not_exist'
         pi = PluginManager(acpoa_cfg, plugins_cfg)
         if pi.is_installed(package): pi.remove(package)
-        os.system(f"pip install {package}==2.0.0")
+        pi.install(package, version="2.0.0")
 
         # Tests
         try:
@@ -67,8 +67,8 @@ class TestPluginManager(unittest.TestCase):
             self.assertRaises(Exception, pi.update, non_existing_package)
             # Test update not installed package
             pi.remove(package)
-            pi.update(package)
-            assert pi.is_installed(package)
+            assert not pi.is_installed(package)
+            self.assertRaises(Exception, pi.update, package)
         except:
             raise
         finally:
@@ -88,3 +88,23 @@ class TestPluginManager(unittest.TestCase):
             raise
         finally:
             self.clean_files(acpoa_cfg, plugins_cfg)
+
+    def test_load(self):
+        # Initialize data and objects
+        acpoa_cfg = os.path.join('test_plugin_manager', 'load', 'acpoa.cfg')
+        plugins_cfg = os.path.join('test_plugin_manager', 'load', 'plugins.cfg')
+        self.copy_files(acpoa_cfg, plugins_cfg)
+        pi = PluginManager(acpoa_cfg, plugins_cfg)
+        package = 'sample-plugin'
+
+        try:
+            pi.install(package)
+            assert pi.is_installed(package)
+            plugins = pi.load()
+            assert len(plugins) == 1
+            assert hasattr(plugins[0], 'register_hooks')
+        except:
+            raise
+        finally:
+            self.clean_files(acpoa_cfg, plugins_cfg)
+            pi.remove(package)

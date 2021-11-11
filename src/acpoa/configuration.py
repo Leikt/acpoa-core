@@ -101,3 +101,9 @@ class Configuration(configparser.ConfigParser):
             self.set(section, option, final)
         else:
             self.set(section, option, value)
+
+    def ensure(self, section: str, option: str, default_value: any):
+        if not self.has_section(section):
+            self.add_section(section)
+        if not self.has_option(section, option):
+            self.set(section, option, default_value)

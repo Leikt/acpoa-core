@@ -1,2 +1,0 @@
-class PluginBase:
-    pass

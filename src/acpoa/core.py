@@ -8,8 +8,8 @@
 import configparser
 import enum
 import os.path
-import shutil
 
+from .defaults import cfg_acpoa, cfg_plugin
 from .hookshandler import HooksHandler, CumulativeHooksHandler
 from .plugin_manager import PluginManager
 from .singleton import Singleton
@@ -18,10 +18,9 @@ from .singleton import Singleton
 class Core(metaclass=Singleton):
     """Manage communication between the different plugins and provide essential application interface."""
 
-    ACPOA_CFG_DEFAULT = "defaults/acpoa.cfg"
-    PLUGINS_CFG_DEFAULT = "defaults/plugins.cfg"
-    ACPOA_CFG = "cfg/acpoa.cfg"
-    PLUGINS_CFG = "cfg/plugins.cfg"
+    CFG_DIR = 'cfg'
+    ACPOA_CFG = os.path.join(CFG_DIR, 'acpoa.cfg')
+    PLUGINS_CFG = os.path.join(CFG_DIR, 'plugins.cfg')
 
     class Status(enum.IntEnum):
         INITIALIZED = 1
@@ -31,10 +30,7 @@ class Core(metaclass=Singleton):
 
     def __init__(self):
         # Initialize configuration files if needed
-        if not os.path.isfile(Core.ACPOA_CFG):
-            Core._copy_default(self.ACPOA_CFG_DEFAULT, self.ACPOA_CFG)
-        if not os.path.isfile(Core.PLUGINS_CFG):
-            Core._copy_default(self.PLUGINS_CFG_DEFAULT, self.PLUGINS_CFG)
+        self._init_configuration()
         # Read the configuration file
         self._config = configparser.ConfigParser()
         self._config.read(Core.ACPOA_CFG)
@@ -58,12 +54,12 @@ class Core(metaclass=Singleton):
         if self._status < Core.Status.LOADED:
             raise Exception("Core.run called before Core.load")
         self._status = Core.Status.RUNNING
-        self.execute('run', *argv)
+        self.execute('on_run', *argv)
 
     def quit(self):
         """Start the exit sequence and close the application."""
         self._status = Core.Status.QUTTING
-        self.execute('quit')
+        self.execute('on_quit')
 
     def fetch(self, name: str, klass: callable = None) -> HooksHandler:
         """Get the handler with the given name. Create it if it does not exist.
@@ -129,14 +125,20 @@ class Core(metaclass=Singleton):
         """Return the status of the Core"""
         return self._status
 
-    @staticmethod
-    def _copy_default(src, dst):
-        print(f"No file found at '{dst}'.")
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
-        default_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), src)
-        shutil.copyfile(default_path, dst)
-        print(f"File copied from default to '{dst}'.")
+    # @staticmethod
+    # def _copy_default(src, dst):
+    #     print(f"No file found at '{dst}'.")
+    #     os.makedirs(os.path.dirname(dst), exist_ok=True)
+    #     default_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), src)
+    #     shutil.copyfile(default_path, dst)
+    #     print(f"File copied from default to '{dst}'.")
+
+    def _init_configuration(self):
+        if not os.path.isdir(self.CFG_DIR):
+            os.mkdir(self.CFG_DIR)
+        cfg_acpoa(self.ACPOA_CFG)
+        cfg_plugin(self.PLUGINS_CFG)
 
     def _init_handlers(self):
-        self.fetch('run', CumulativeHooksHandler)
-        self.fetch('quit', CumulativeHooksHandler)
+        self.fetch('on_run', CumulativeHooksHandler)
+        self.fetch('on_quit', CumulativeHooksHandler)

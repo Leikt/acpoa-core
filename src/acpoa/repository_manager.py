@@ -3,7 +3,7 @@ import warnings
 
 import requests
 
-from src.core.configuration import Configuration
+from .configuration import Configuration
 
 
 class RepositoryManager:
@@ -109,18 +109,20 @@ class Repository:
         self._editable = editable
         self._editable_opt = '-e' if editable else ''
 
-    def install(self, package: str, upgrade: bool = False) -> int:
+    def install(self, package: str, upgrade: bool = False, version='') -> int:
         """Try to install the package.
 
         :param package: name of the package to install
         :param upgrade: if true, upgrade the installed package
+        :param version: version of the package to install
         :return: pip result"""
 
+        version_text = '' if len(version) == 0 else f"=={version}"
         command = f"pip -q install {self._editable_opt} " \
                   f"{'--upgrade' if upgrade else ''} " \
                   f"--no-cache-dir " \
                   f"--index-url {self._index} " \
-                  f"{package} "
+                  f"{package}{version_text}"
         return os.system(command)
 
     def upgrade(self, package) -> int:

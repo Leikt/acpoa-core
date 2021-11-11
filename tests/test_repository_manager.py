@@ -2,7 +2,7 @@ import os.path
 import shutil
 import unittest
 
-from src.core.repository_manager import RepositoryManager
+from src.acpoa import RepositoryManager
 
 
 class TestPluginInstaller(unittest.TestCase):

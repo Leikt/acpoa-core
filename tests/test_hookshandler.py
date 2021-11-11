@@ -1,6 +1,6 @@
 import unittest
 
-from src.core import HooksHandler, DecorativeHooksHandler, CumulativeHooksHandler, UniqueHooksHandler
+from src.acpoa import HooksHandler, DecorativeHooksHandler, CumulativeHooksHandler, UniqueHooksHandler
 
 
 class TestHandler(unittest.TestCase):

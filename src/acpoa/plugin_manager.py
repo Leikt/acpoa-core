@@ -1,8 +1,8 @@
 import importlib.util
 import warnings
 
-from src.core.configuration import Configuration
-from src.core.repository_manager import RepositoryManager, Repository
+from .configuration import Configuration
+from .repository_manager import RepositoryManager, Repository
 
 
 class PluginManager:
@@ -16,10 +16,11 @@ class PluginManager:
         self._plugin_eoi = self._config.get(self._ACPOA_CFG_SECTION_PLUGINS, 'enable-on-installation')
         self._repository_manager = RepositoryManager(config_fname)
 
-    def install(self, package: str):
+    def install(self, package: str, version=''):
         """Install the given plugin from the repositories
 
         :param package: name of the plugin to install
+        :param version: version of the package to install
         :raise Exception: if the package couldn't be installed. Provides pip error code."""
 
         if self._repository_manager.count == 0:
@@ -29,7 +30,7 @@ class PluginManager:
             return
 
         for repo in self._repository_manager.each():
-            result = repo.install(package)
+            result = repo.install(package, version=version)
             if result == 0: break
         if result > 0: raise Exception(f"Package '{package}' can't be installed. Pip returned error core : {result}")
 
@@ -60,10 +61,10 @@ class PluginManager:
         take upgrade into account.
 
         :param package: name of the package to update
-        :raise Exception: if package couldn't be updated."""
+        :raise Exception: if package couldn't be updated or if the package is not installed."""
 
-        # if importlib.util.find_spec(package) is None:
-        #     raise Exception(f"Package '{package}' is not installed therefore it can't be updated.")
+        if not self.is_installed(package):
+            raise Exception(f"Package '{package}' is not installed therefore it can't be updated.")
         if self._repository_manager.count == 0:
             raise Exception("There is no repository registered or enabled.")
 
@@ -78,11 +79,21 @@ class PluginManager:
         :param package: name of the plugin to test
         :return: whether or not the plugin is installed"""
 
-        res = importlib.util.find_spec(package)
-        return res is not None
+        res = importlib.util.find_spec(self._importable_name(package))
+        # return res is not None
+        return self._plugins_config.has_section(package) and res is not None
 
     def is_enabled(self, package: str) -> bool:
         pass
 
     def load(self) -> list:
-        return []
+        plugins = []
+        for mod_name in self._plugins_config.sections():
+            importable_mod_name = self._importable_name(mod_name)
+            mod = __import__(importable_mod_name)
+            klass = getattr(mod, 'Plugin')
+            plugins.append(klass())
+        return plugins
+
+    def _importable_name(self, name: str):
+        return name.replace('-', '_')

@@ -4,8 +4,9 @@ services:
   pypiserver:
     container_name: pypiserver_test
     image: pypiserver/pypiserver
-    restart: always
     ports:
       - 8080:8080
     volumes:
       - ./packages:/data/packages
+    command: -P . -a . /data/packages
+...

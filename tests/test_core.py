@@ -1,6 +1,6 @@
 import unittest
 
-from src.core import Core, CumulativeHooksHandler, DecorativeHooksHandler, HooksHandler
+from src.acpoa import Core, CumulativeHooksHandler, DecorativeHooksHandler, HooksHandler
 
 
 class NonExistant:

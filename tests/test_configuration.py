@@ -2,7 +2,7 @@ import os.path
 import shutil
 import unittest
 
-from src.core.configuration import Configuration
+from src.acpoa.configuration import Configuration
 
 
 class TestConfiguration(unittest.TestCase):

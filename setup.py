@@ -8,15 +8,15 @@ with open("README.md", "r", encoding="utf-8") as fh:
 files = []
 
 setuptools.setup(
-    name="core",
-    version="0.0.1",
+    name="acpoa",
+    version="0.0.8",
     author="Leikt",
     author_email="leikt.solreihin@gmail.com",
     description="Application Core for Plugin Oriented Applications",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Leikt/acpoa-core",
-    project_urls = {
+    project_urls={
         "Bug Tracker": "https://github.com/Leikt/acpoa-core/issues",
         "Wiki": "https://github.com/Leikt/acpoa-core/wiki",
         "Discussions": "https://github.com/Leikt/acpoa-core/discussions"
@@ -25,6 +25,9 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+    ],
+    install_requires=[
+        "requests"
     ],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
